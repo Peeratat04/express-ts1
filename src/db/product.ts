@@ -1,4 +1,4 @@
-import { RowDataPacket } from "mysql2"; // Import type for rows returned from queries
+import { RowDataPacket, ResultSetHeader } from "mysql2"; // Import type for rows returned from queries
 import { promisePool } from "../config/db";
 
 const selectAll = async () => {
@@ -12,4 +12,23 @@ const selectAll = async () => {
   }
 };
 
-export default { selectAll };
+// // Function to delete a product by ID
+const deleteProductById = async (id: number): Promise<void> => {
+  try {
+    console.log(`Attempting to delete product with ID: ${id}`);
+    const [result] = await promisePool.query<ResultSetHeader>(
+      "DELETE FROM product WHERE id = ?",
+      [id]
+    );
+    console.log("Delete result:", result);
+    // Optionally, you can check if the affectedRows property is 0 to handle the case where no rows were deleted
+    if ((result as ResultSetHeader).affectedRows === 0) {
+      console.warn(`No product found with ID: ${id}`);
+    }
+  } catch (err) {
+    console.error("Database deletion error:", err);
+    throw err; // It's good practice to throw the error after logging it
+  }
+};
+
+export default { selectAll, deleteProductById };
